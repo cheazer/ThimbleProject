@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+requests
+beautifulsoup4
+streamlit
+python-dotenv
+# only needed when LLM_MODE=gemini
+# google-genai
+# only needed to run the tests
+pytest
+httpx

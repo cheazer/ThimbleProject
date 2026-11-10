@@ -1,0 +1,77 @@
+{
+  "_note": "Seed taxonomy of addictive design. Categories are grouped by mechanism, drawing on the two source taxonomies below. The full texts were not accessible when this was drafted, so the team should check category names and definitions against the papers before relying on them.",
+  "seed_sources": [
+    {
+      "id": "seed-src-1",
+      "title": "A taxonomy of technology design features that promote potentially addictive online behaviours",
+      "venue": "Nature Reviews Psychology, 2023",
+      "doi": "10.1038/s44159-023-00153-4",
+      "url": "https://www.nature.com/articles/s44159-023-00153-4"
+    },
+    {
+      "id": "seed-src-2",
+      "title": "Defining, Classifying and Identifying Addictive Patterns in Digital Products",
+      "venue": "IEEE Transactions on Technology and Society, 2025",
+      "doi": "",
+      "url": "https://www.researchgate.net/publication/391467154_Defining_Classifying_and_Identifying_Addictive_Patterns_in_Digital_Products"
+    }
+  ],
+  "seed_search_terms": [
+    "addictive design",
+    "addictive pattern",
+    "dark pattern",
+    "compulsive use",
+    "loss of control"
+  ],
+  "categories": [
+    {
+      "id": "endless_content",
+      "name": "Endless and frictionless consumption",
+      "definition": "Features that remove natural stopping points, so use continues without an active choice by the user.",
+      "sources": ["seed-src-1", "seed-src-2"],
+      "keywords": ["infinite scroll", "autoplay", "pull to refresh", "binge watching"]
+    },
+    {
+      "id": "variable_rewards",
+      "name": "Variable and unpredictable rewards",
+      "definition": "Rewards delivered on an unpredictable schedule, which reinforces repeated checking or play.",
+      "sources": ["seed-src-1", "seed-src-2"],
+      "keywords": ["variable reward", "random reward", "loot box"]
+    },
+    {
+      "id": "social_feedback",
+      "name": "Social feedback and social pressure",
+      "definition": "Features that use approval, comparison or obligations to other people to bring users back.",
+      "sources": ["seed-src-1", "seed-src-2"],
+      "keywords": ["like count", "follower count", "read receipt", "social comparison"]
+    },
+    {
+      "id": "reengagement",
+      "name": "Notifications and re-engagement prompts",
+      "definition": "Prompts sent outside a session that pull the user back into the product.",
+      "sources": ["seed-src-1", "seed-src-2"],
+      "keywords": ["push notification", "notification badge", "reminder message"]
+    },
+    {
+      "id": "streaks_goals",
+      "name": "Streaks, goals and loss aversion",
+      "definition": "Progress mechanics that make stopping feel like losing something the user has already earned.",
+      "sources": ["seed-src-1", "seed-src-2"],
+      "keywords": ["streak", "daily reward", "login bonus", "progress bar"]
+    },
+    {
+      "id": "personalisation",
+      "name": "Personalisation and immersion",
+      "definition": "Content selection and identity features that tailor the experience so it is harder to leave.",
+      "sources": ["seed-src-1"],
+      "keywords": ["personalised feed", "recommender system", "avatar"]
+    },
+    {
+      "id": "monetisation",
+      "name": "Monetisation pressure",
+      "definition": "In app spending mechanics that hide the real cost or tie spending to the loops above.",
+      "sources": ["seed-src-1", "seed-src-2"],
+      "keywords": ["microtransaction", "virtual currency", "pay to skip"]
+    }
+  ]
+}
