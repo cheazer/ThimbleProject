@@ -9,7 +9,8 @@ import requests
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from pipeline import db, llm, orchestrator, review, terms, updater  # noqa: E402
+from pipeline import db, flagger, llm, orchestrator, review, terms, updater  # noqa: E402
+from pipeline.extractor import REASONS  # noqa: E402
 
 st.set_page_config(page_title="FairDigit taxonomy demo", layout="wide")
 
@@ -105,7 +106,6 @@ with tabs[0]:
             + ". Nothing from these pages was downloaded or stored.")
 
     st.subheader("Exclusions by reason")
-    from pipeline.extractor import REASONS
     counts = Counter(e["reason"] for e in active)
     st.dataframe([{"reason": REASONS[r], "count": n} for r, n in counts.most_common()], hide_index=True)
     st.dataframe([{"paper": e["paper_ref"], "title": e["title"], "reason": REASONS[e["reason"]],
@@ -249,4 +249,21 @@ with tabs[4]:
 # ---------- Flag an app ----------
 
 with tabs[5]:
-    st.write("Placeholder, added in the next step.")
+    st.write("Describe what you see in an app. The description is matched against taxonomy keywords, "
+             "including ones added today. Matching is by keyword only.")
+    example = ("Videos autoplay one after another with no stopping cue. A streak counter warns you "
+               "before you lose it. Stories are ephemeral content that vanishes after 24 hours.")
+    desc = st.text_area("App description (synthetic example)", example, height=100)
+    if st.button("Check against taxonomy"):
+        hits = flagger.flag(desc)
+        if not hits:
+            st.write("No taxonomy keywords found in the description.")
+        for h in hits:
+            tag = "canonical" if h["status"] == "canonical" else "candidate, not yet canonical"
+            with st.container(border=True):
+                st.markdown(f"**{h['name']}** ({tag})")
+                st.write("Matched keywords: " + ", ".join(h["keywords"]))
+                if h["provisions"]:
+                    st.write("Provisions that may be relevant: " + ", ".join(h["provisions"]))
+                st.caption("Supporting sources: " + ", ".join(h["citations"]))
+        st.info(flagger.DISCLAIMER)

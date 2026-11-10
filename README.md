@@ -6,6 +6,8 @@ Built for LS3009 Legal Design Clinic on Fair Digital Transition, University of A
 
 > **Prototype only.** It runs on synthetic data. The papers, authors and journals in the demo are invented. Nothing here is legal advice, and the tool does not decide whether anything is lawful.
 
+**Quick start:** `pip install -r requirements.txt`, then `python run_demo.py` for a headless check, or start `uvicorn fake_site.main:app --port 8001` and `streamlit run pipeline/app.py` for the dashboard. Full steps are in [section 10](#10-run-it).
+
 ## 1. The challenge
 
 From the module brief (lecture slide 30): complaints about social media platforms that appear to encourage compulsive use, especially among children and young people, have shot up. Analysing apps by hand (reviewing screenshots, recording sessions, comparing interfaces against consumer protection and online safety rules) is slow, expensive and hard to scale. The NGO FairDigit wants a digital tool to automate that process. The tool should not replace legal judgement. It should help flag problematic practices.
@@ -82,7 +84,7 @@ Any taxonomy node can be traced back to the paper, the agent output and the pers
 
 ## 7. Data
 
-Synthetic only. A script (`scripts/generate_seed_data.py`) creates about [40] fictional papers with invented authors and a made-up journal name, and labels them as synthetic in the UI. The set includes deliberate test cases:
+Synthetic only. The prototype ships 12 hand-written fictional papers in `fake_site/papers.json` (invented authors, DOIs like 10.0000/syn.001, titles ending "(synthetic)"); section 10 lists what each one tests. A fuller set (about 40 papers) could include deliberate test cases such as:
 - clearly relevant papers
 - off-topic papers
 - duplicates
@@ -100,54 +102,124 @@ A single page takes a synthetic "app observation" (a text description of a scree
 
 | Part | Choice |
 |---|---|
-| Backend and agents | Python 3.11+, FastAPI |
-| Storage | SQLite |
-| Ontology | `rdflib`, optional `pyshacl` |
-| Dashboard | [React + Vite or Streamlit: update to match our design] |
-| Live progress | Server-sent events from the API |
-| LLM | `mock` mode (default), local model through Ollama, or a free-tier API. Set with `LLM_MODE` in `.env` |
-| Mock paper database | Small FastAPI app serving the synthetic data |
+| Agents | Python 3.11+, plain functions coordinated by `pipeline/orchestrator.py` |
+| Storage | SQLite (`pipeline/db.py`) |
+| Ontology | not built yet (planned: `rdflib`, optional `pyshacl`); the canonical rule is a Python check |
+| Dashboard | Streamlit |
+| Live progress | not built; the dashboard reloads after each action |
+| LLM | `mock` mode (default), local model through Ollama, or the Gemini free tier. Set with `LLM_MODE` in `.env` |
+| Mock paper database | Small FastAPI app serving the synthetic data as HTML (`fake_site/`) |
 
 `mock` mode returns scripted outputs, so the demo is repeatable and never depends on a rate limit or the network. Free-tier limits change, so check them before relying on one.
 
 ## 10. Run it
 
-*Proposed layout and commands. Update to match the repo.*
+The working prototype is smaller than the full design above. It has three agents (Extractor, Interpreter, Updater) coordinated by plain Python, a Streamlit dashboard and SQLite. The ontology (rdflib, SHACL), PROV-O export, server-sent events and a React dashboard are not built; the activity log in `events` stands in for provenance.
+
+Needs Python 3.11 or newer. Everything runs locally and offline in mock mode.
 
 ```bash
-git clone [repo URL]
-cd [repo]
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env                       # LLM_MODE=mock by default
-python scripts/generate_seed_data.py
-uvicorn scholardb.main:app --port 8001     # mock paper database
-uvicorn app.main:app --port 8000           # agents and API
-cd dashboard && npm install && npm run dev # dashboard
+python -m venv .venv
 ```
 
+```bash
+.venv\Scripts\activate
 ```
-scholardb/      mock paper database (synthetic)
-app/agents/     seeker, interpreter, mapper
-app/screening/  eligibility rules
-app/ontology/   taxonomy, RDF graph, rules
-app/provenance/ PROV-style log
-app/llm/        mock, local and API clients behind one interface
-dashboard/      web UI
-contracts/      JSON schemas shared by everyone
-scripts/        seed data generator
-docs/           plans, journey map, notes
+
+(on macOS or Linux: `source .venv/bin/activate`)
+
+```bash
+pip install -r requirements.txt
 ```
+
+```bash
+copy .env.example .env
+```
+
+(on macOS or Linux: `cp .env.example .env`; `LLM_MODE=mock` is the default)
+
+Headless check of the whole flow (starts and stops the fake site itself, uses its own database):
+
+```bash
+python run_demo.py
+```
+
+Tests:
+
+```bash
+python -m pytest -q
+```
+
+Live demo, two terminals, both from the repo root:
+
+```bash
+uvicorn fake_site.main:app --port 8001
+```
+
+```bash
+streamlit run pipeline/app.py
+```
+
+Then open http://localhost:8501. To start again from scratch use the sidebar button **Reset demo**, or `python scripts/reset_demo.py`.
+
+**Two separate apps.** `fake_site/` is the pretend publisher and owns the 12 synthetic papers. `pipeline/` owns the agents, `demo.db`, the seed taxonomy and the scripted model answers. The pipeline only talks to the fake site over HTTP and never imports from it.
+
+```
+fake_site/main.py              FastAPI site: /, /paper/{id}, /premium/paper/{id}, /terms,
+                               /robots.txt, /.well-known/tdmrep.json, POST /admin/advance, /admin/reset
+fake_site/papers.json          the 12 synthetic papers, in two batches
+pipeline/db.py                 all SQLite access (demo.db)
+pipeline/sources.py            SourceAdapter interface and FakeSiteAdapter (requests + BeautifulSoup),
+                               robots.txt, tdmrep.json and tdm-reservation header checks
+pipeline/extractor.py          Extractor agent: screening rules, exclusions with reasons, cursor
+pipeline/terms.py              search terms = seed terms + every taxonomy keyword
+pipeline/llm.py                ask_json(prompt, mock_key): mock, gemini or ollama
+pipeline/interpreter.py        Interpreter agent: prompt and plain Python checks
+pipeline/review.py             human decisions
+pipeline/updater.py            Updater agent: taxonomy changes, version, canonical rule
+pipeline/orchestrator.py       runs the agents in order
+pipeline/flagger.py            "Flag an app" keyword matching
+pipeline/app.py                Streamlit dashboard
+pipeline/seed/taxonomy.json    seed taxonomy (7 categories) and seed search terms
+pipeline/seed/mock_interpretations.json   scripted model answers, keyed by paper id
+scripts/reset_demo.py          wipe and reseed
+run_demo.py                    headless end to end check
+tests/                         pytest tests
+```
+
+**Using a real model (optional, free).** Set `LLM_MODE=gemini` with a free `GEMINI_API_KEY` from Google AI Studio and `pip install google-genai`, or `LLM_MODE=ollama` after `ollama pull gemma3:4b`. The interpreter checks run the same way, so a real model's made-up quotes are caught just like the scripted one.
+
+### The 12 synthetic papers
+
+| Paper | Batch | What it tests | Expected |
+|---|---|---|---|
+| syn-001 | 1 | relevant, fits an existing category | included |
+| syn-002 | 1 | relevant, needs a new category ("Ephemeral content") | included |
+| syn-003 | 1 | off topic | excluded: no match |
+| syn-004 | 1 | same DOI as syn-001 | excluded: duplicate DOI |
+| syn-005 | 1 | published 2012 | excluded: outside 2015 to 2026 |
+| syn-006 | 1 | retracted | excluded: retracted |
+| syn-007 | 1 | German | excluded: not English |
+| syn-008 | 1 | scripted answer has a made-up quote | included, quote check fires |
+| syn-009 | 1 | Synthetic Press Premium | skipped: TDM opt-out respected |
+| syn-010 | 2 | Synthetic Press Premium | skipped: TDM opt-out respected |
+| syn-011 | 2 | only matches "ephemeral content", an approved keyword | excluded until that keyword is approved, then included |
+| syn-012 | 2 | first model reply is broken JSON; abstract contains an instruction aimed at AI | retried once; flagged |
+
+### The seed taxonomy
+
+`pipeline/seed/taxonomy.json` has 7 canonical categories grouped by mechanism: endless and frictionless consumption, variable rewards, social feedback, notifications and re-engagement, streaks and loss aversion, personalisation and immersion, and monetisation pressure. It draws on the two source taxonomies listed in that file (Nature Reviews Psychology, 2023, doi:10.1038/s44159-023-00153-4; IEEE Transactions on Technology and Society, 2025). The full texts were paywalled or blocked when the seed was drafted, so **check the category names and definitions against the papers** before relying on them.
 
 ## 11. Demo script
 
-1. Show the mock database with new papers arriving.
-2. Run the seeker. Watch screening include some papers and exclude others with reasons.
-3. Open the review queue. Show the evidence, then the interpretation. Approve one, correct one, reject one.
-4. Show the mapper's diff: a new candidate pattern and a new link to a provision.
-5. Show the seeker memory gaining new search terms.
-6. Open provenance for one taxonomy node and trace it back to the paper and the reviewer.
-7. Run the flagging demo on an observation that matches the new pattern.
+1. Sidebar: **Run pipeline**. The Pipeline tab shows 3 papers included and 6 excluded, each with a reason. The premium paper is highlighted as "TDM opt-out respected".
+2. Review queue: show the evidence (quotes) first. syn-008 has a red "quote not found" warning and that keyword starts unticked. Approve syn-001 and syn-002, and approve syn-008 without the made-up keyword.
+3. Taxonomy tab: the version has gone up, "Ephemeral content" is a new candidate category, and the new keywords carry citations and provision links.
+4. Search terms tab: "ephemeral content", "stopping cue" and the others appear, labelled with the paper they came from.
+5. Sidebar: **Publish next batch**, then **Run pipeline**. syn-011 is picked up only because "ephemeral content" is now a search term. syn-012 shows the warning about instruction-like text.
+6. Activity log: trace a keyword back to the paper, the interpreter output and the reviewer's decision.
+7. Taxonomy tab: promote "Ephemeral content" to canonical (allowed because it has a definition and a citation).
+8. Flag an app: the example description matches the new category. The result ends with "For legal review, not a finding".
 
 ## 12. Lecture questions (slide 30 and the "Some thoughts" slide)
 
