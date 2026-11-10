@@ -138,6 +138,9 @@ def reset_and_seed(site_url):
                     "VALUES(?,?,?,?,?)", (term, c["id"], dumps(cites), "seed taxonomy", now()))
 
     set_setting("seed_search_terms", seed["seed_search_terms"])
+    # starting point for terms.refresh(), so later additions can be logged
+    set_setting("search_terms_snapshot", seed["seed_search_terms"]
+                + [k for c in seed["categories"] for k in c["keywords"]])
     set_setting("seed_sources", seed["seed_sources"])
     set_setting("taxonomy_version", 1)
     log("system", "reset", detail="Database wiped and seed taxonomy loaded (version 1)")

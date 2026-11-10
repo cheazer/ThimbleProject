@@ -35,6 +35,6 @@ def refresh():
     new = [t["term"] for t in search_terms()]
     added = [t for t in new if t not in old]
     db.set_setting("search_terms_snapshot", new)
-    if old and added:
+    if added:
         db.log("updater", "search terms refreshed", detail="Added: " + ", ".join(added))
     return added
