@@ -1,0 +1,65 @@
+{
+  "_note": "Scripted model answers for LLM_MODE=mock, keyed by paper id. Never served by the fake site. A list gives one answer per attempt (used to show the broken JSON retry).",
+  "syn-001": {
+    "summary": "A synthetic experiment compares an autoplay feed with a feed that pauses after each clip. People in the autoplay feed watched longer and felt less in control. The authors link this to the lack of a stopping cue.",
+    "category": "endless_content",
+    "new_category_name": "",
+    "new_category_definition": "",
+    "keywords": [
+      {"term": "autoplay", "quote": "Participants in the autoplay condition watched for longer and reported less sense of control."},
+      {"term": "stopping cue", "quote": "The absence of a stopping cue meant that sessions ended only when an external interruption occurred."}
+    ],
+    "provision": "DSA Art 25",
+    "confidence": 0.82
+  },
+  "syn-002": {
+    "summary": "A synthetic interview study on stories that vanish after 24 hours. Interviewees checked the app often so they would not miss posts. The authors propose ephemeral content as a separate addictive pattern.",
+    "category": "NEW",
+    "new_category_name": "Ephemeral content",
+    "new_category_definition": "Content that is only available for a short, fixed time, so users check often to avoid missing it.",
+    "keywords": [
+      {"term": "ephemeral content", "quote": "We describe ephemeral content as posts that are only available for a short, fixed period."},
+      {"term": "disappearing stories", "quote": "Disappearing stories were mentioned by most interviewees as the main reason for frequent checking."}
+    ],
+    "provision": "DSA Arts 34 and 35",
+    "confidence": 0.7
+  },
+  "syn-008": {
+    "summary": "A synthetic analysis of streak mechanics in language learning apps. When a streak was about to break, the apps offered a paid repair, and users with long streaks paid more often. The authors relate this to loss aversion.",
+    "category": "streaks_goals",
+    "new_category_name": "",
+    "new_category_definition": "",
+    "keywords": [
+      {"term": "streak repair", "quote": "Users who bought a streak repair opened the app twice as often."},
+      {"term": "loss aversion", "quote": "We relate these findings to loss aversion."}
+    ],
+    "provision": "UCPD Arts 8 and 9",
+    "confidence": 0.75
+  },
+  "syn-011": {
+    "summary": "A synthetic experiment shows temporary posts with and without a countdown timer. Participants who saw the timer came back sooner. The authors suggest visible time limits increase the pressure to return.",
+    "category": "ephemeral_content",
+    "new_category_name": "",
+    "new_category_definition": "",
+    "keywords": [
+      {"term": "countdown timer", "quote": "In one version a countdown timer shows how long each post will remain visible."}
+    ],
+    "provision": "none",
+    "confidence": 0.68
+  },
+  "syn-012": [
+    "{\"summary\": \"A synthetic survey of spending in mobile games\", \"category\": ",
+    {
+      "summary": "A synthetic survey of players about spending in mobile games. Loot boxes are often sold for a premium currency, and players could not say what they had spent in real money. The authors argue currency conversion hides the price of random rewards.",
+      "category": "monetisation",
+      "new_category_name": "",
+      "new_category_definition": "",
+      "keywords": [
+        {"term": "premium currency", "quote": "Many games sell loot boxes for a premium currency rather than for money."},
+        {"term": "loot box", "quote": "Players often could not say how much real money a loot box had cost them."}
+      ],
+      "provision": "UCPD Arts 6 and 7",
+      "confidence": 0.8
+    }
+  ]
+}
